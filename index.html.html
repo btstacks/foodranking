@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food Tribunal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0e0c0a;
+      --surface: #1a1714;
+      --card: #221f1b;
+      --border: #2e2924;
+      --accent-hot: #e8552a;
+      --accent-cold: #3a8fd4;
+      --accent-good: #5ab552;
+      --accent-bad: #c4395e;
+      --text: #f0ebe4;
+      --text-muted: #7a7067;
+      --stamp: #e8c84a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.5;
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      padding: 24px 40px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      cursor: pointer;
+    }
+    .logo span { color: var(--stamp); }
+
+    nav { display: flex; gap: 8px; }
+
+    .nav-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .nav-btn:hover { color: var(--text); border-color: var(--text-muted); }
+    .nav-btn.active { color: var(--text); border-color: var(--text-muted); background: var(--surface); }
+
+    /* ── Pages ── */
+    .page { display: none; width: 100%; }
+    .page.visible { display: flex; flex-direction: column; align-items: center; }
+
+    /* ── Vote Page ── */
+    #vote-page {
+      max-width: 680px;
+      padding: 44px 24px 80px;
+      gap: 32px;
+    }
+
+    .intro { text-align: center; }
+    .intro h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+    .intro p {
+      margin-top: 10px;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 300;
+    }
+
+    .food-card {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 36px 32px;
+      position: relative;
+      animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .corner-tag {
+      position: absolute;
+      top: 14px; right: 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.63rem;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .food-visual {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .food-emoji-wrap {
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4.5rem;
+    }
+
+    .food-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: -0.02em;
+    }
+
+    .vote-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 480px) { .vote-sections { grid-template-columns: 1fr; } }
+
+    .vote-group { display: flex; flex-direction: column; gap: 8px; }
+
+    .vote-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.63rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .vote-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 13px 16px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      transition: all 0.16s;
+    }
+    .vote-btn:hover { background: #272320; }
+    .vote-btn.sel-hot  { border-color: var(--accent-hot);  color: var(--accent-hot);  background: #2a1612; }
+    .vote-btn.sel-cold { border-color: var(--accent-cold); color: var(--accent-cold); background: #0e1e2e; }
+    .vote-btn.sel-good { border-color: var(--accent-good); color: var(--accent-good); background: #0e2011; }
+    .vote-btn.sel-bad  { border-color: var(--accent-bad);  color: var(--accent-bad);  background: #2a0e18; }
+
+    .submit-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 26px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+    }
+
+    .skip-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 15px 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.16s;
+    }
+    .skip-btn:hover { color: var(--text); border-color: var(--text-muted); }
+
+    .submit-btn {
+      flex: 1;
+      background: var(--stamp);
+      color: #0e0c0a;
+      border: none;
+      padding: 15px 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.16s;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .submit-btn.ready { opacity: 1; pointer-events: all; }
+    .submit-btn.ready:hover { background: #f0d055; }
+
+    .vote-counter {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+    .vote-counter b { color: var(--stamp); font-weight: 500; }
+
+    /* ── Done card ── */
+    .done-card {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 60px 32px;
+      text-align: center;
+      animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .done-card .big-icon { font-size: 3rem; margin-bottom: 18px; }
+    .done-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .done-card p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 28px; }
+    .cta-btn {
+      display: inline-block;
+      background: var(--stamp);
+      color: #0e0c0a;
+      padding: 14px 28px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      transition: background 0.16s;
+      margin: 4px;
+    }
+    .cta-btn:hover { background: #f0d055; }
+    .cta-btn.secondary {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .cta-btn.secondary:hover { color: var(--text); border-color: var(--text-muted); background: none; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px 22px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--stamp);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 200;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Results Page ── */
+    #results-page {
+      max-width: 1020px;
+      padding: 44px 24px 80px;
+      gap: 0;
+      align-items: stretch;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .results-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+    .results-header p { color: var(--text-muted); font-size: 0.83rem; margin-top: 6px; }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.63rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .sort-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sort-btn:hover { color: var(--text); border-color: var(--text-muted); }
+    .sort-btn.active { color: var(--stamp); border-color: var(--stamp); background: #1e1c14; }
+
+    .spacer { flex: 1; }
+
+    .total-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      letter-spacing: 0.07em;
+    }
+    .total-badge b { color: var(--stamp); }
+
+    .refresh-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .refresh-btn:hover { color: var(--text); border-color: var(--text-muted); }
+
+    .table-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead tr { border-bottom: 2px solid var(--border); }
+
+    th {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.63rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th:first-child { width: 220px; }
+
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.13s; }
+    tbody tr:hover { background: var(--surface); }
+
+    td { padding: 14px; vertical-align: middle; }
+
+    .food-cell { display: flex; align-items: center; gap: 11px; }
+    .food-cell-emoji { font-size: 1.4rem; width: 32px; text-align: center; }
+    .food-cell-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .bar-cell { min-width: 160px; }
+    .bar-pair { display: flex; flex-direction: column; gap: 5px; }
+    .bar-row { display: flex; align-items: center; gap: 7px; }
+    .bar-lbl {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.05em;
+      width: 38px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      min-width: 60px;
+    }
+    .bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s cubic-bezier(0.16,1,0.3,1); }
+    .bar-fill.hot  { background: var(--accent-hot); }
+    .bar-fill.cold { background: var(--accent-cold); }
+    .bar-fill.good { background: var(--accent-good); }
+    .bar-fill.bad  { background: var(--accent-bad); }
+    .bar-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      width: 22px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 9px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+    .verdict.hot  { color: var(--accent-hot);  border-color: var(--accent-hot);  background: #2a1612; }
+    .verdict.cold { color: var(--accent-cold); border-color: var(--accent-cold); background: #0e1e2e; }
+    .verdict.good { color: var(--accent-good); border-color: var(--accent-good); background: #0e2011; }
+    .verdict.bad  { color: var(--accent-bad);  border-color: var(--accent-bad);  background: #2a0e18; }
+    .verdict.tie  { color: var(--text-muted); border-color: var(--border); }
+
+    .no-data-row td {
+      text-align: center;
+      padding: 60px;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="showPage('vote')">Food <span>Tribunal</span></div>
+  <nav>
+    <button class="nav-btn active" id="nav-vote" onclick="showPage('vote')">Vote</button>
+    <button class="nav-btn" id="nav-results" onclick="showPage('results')">Results</button>
+  </nav>
+</header>
+
+<!-- ══════════════ VOTE PAGE ══════════════ -->
+<div id="vote-page" class="page visible">
+  <div class="intro">
+    <h1>Judge the Food.</h1>
+    <p>Cast your verdict on temperature &amp; morality. Every vote counts.</p>
+  </div>
+  <div id="card-area"></div>
+  <div class="vote-counter" id="vote-counter"></div>
+</div>
+
+<!-- ══════════════ RESULTS PAGE ══════════════ -->
+<div id="results-page" class="page">
+  <div class="results-header">
+    <div>
+      <h1>The Verdicts</h1>
+      <p>All votes tallied across every session.</p>
+    </div>
+  </div>
+  <div class="controls">
+    <span class="filter-label">Sort:</span>
+    <button class="sort-btn active" onclick="setSort('name', this)">Name</button>
+    <button class="sort-btn" onclick="setSort('votes', this)">Most Voted</button>
+    <button class="sort-btn" onclick="setSort('hot', this)">Hottest</button>
+    <button class="sort-btn" onclick="setSort('good', this)">Goodest</button>
+    <div class="spacer"></div>
+    <span class="total-badge" id="total-badge"></span>
+    <button class="refresh-btn" onclick="renderResults()">↻ Refresh</button>
+  </div>
+  <div class="table-wrap" id="results-table"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Food list ─────────────────────────────────────────────────────────────────
+const FOODS = [
+  { id:'pizza',         name:'Pizza',          emoji:'🍕' },
+  { id:'ice_cream',     name:'Ice Cream',      emoji:'🍦' },
+  { id:'sushi',         name:'Sushi',          emoji:'🍣' },
+  { id:'hot_dog',       name:'Hot Dog',        emoji:'🌭' },
+  { id:'salad',         name:'Salad',          emoji:'🥗' },
+  { id:'burger',        name:'Burger',         emoji:'🍔' },
+  { id:'broccoli',      name:'Broccoli',       emoji:'🥦' },
+  { id:'donut',         name:'Donut',          emoji:'🍩' },
+  { id:'soup',          name:'Soup',           emoji:'🍲' },
+  { id:'apple',         name:'Apple',          emoji:'🍎' },
+  { id:'fries',         name:'Fries',          emoji:'🍟' },
+  { id:'taco',          name:'Taco',           emoji:'🌮' },
+  { id:'soda',          name:'Soda',           emoji:'🥤' },
+  { id:'avocado',       name:'Avocado',        emoji:'🥑' },
+  { id:'fried_chicken', name:'Fried Chicken',  emoji:'🍗' },
+  { id:'carrot',        name:'Carrot',         emoji:'🥕' },
+  { id:'chocolate',     name:'Chocolate',      emoji:'🍫' },
+  { id:'steak',         name:'Steak',          emoji:'🥩' },
+  { id:'smoothie',      name:'Smoothie',       emoji:'🥤' },
+  { id:'cake',          name:'Cake',           emoji:'🎂' },
+  { id:'ramen',         name:'Ramen',          emoji:'🍜' },
+  { id:'watermelon',    name:'Watermelon',     emoji:'🍉' },
+  { id:'nachos',        name:'Nachos',         emoji:'🧀' },
+  { id:'kale',          name:'Kale',           emoji:'🥬' },
+  { id:'lobster',       name:'Lobster',        emoji:'🦞' },
+];
+
+// ── Storage ───────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'food_tribunal_votes_v2';
+
+function loadVotes() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveVotes(votes) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(votes)); }
+  catch(e) { console.error('Storage error', e); }
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const shuffled = [...FOODS].sort(() => Math.random() - 0.5);
+let currentIndex = 0;
+let tempChoice   = null;
+let moralChoice  = null;
+let sortMode     = 'name';
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+  document.getElementById(page + '-page').classList.add('visible');
+  document.getElementById('nav-' + page).classList.add('active');
+
+  if (page === 'results') renderResults();
+}
+
+// ── Vote Page ─────────────────────────────────────────────────────────────────
+function renderVote() {
+  const area = document.getElementById('card-area');
+
+  if (currentIndex >= shuffled.length) {
+    area.innerHTML = `
+      <div class="done-card">
+        <div class="big-icon">🎖️</div>
+        <h2>All foods judged!</h2>
+        <p>You've cast a verdict on every item. Check out the results.</p>
+        <button class="cta-btn" onclick="showPage('results')">View Results →</button>
+        <button class="cta-btn secondary" onclick="restart()">Vote Again</button>
+      </div>`;
+    document.getElementById('vote-counter').textContent = '';
+    return;
+  }
+
+  tempChoice  = null;
+  moralChoice = null;
+  const food  = shuffled[currentIndex];
+  const votes = loadVotes();
+  const total = Object.values(votes).reduce((s, v) => s + (v.hot||0) + (v.cold||0), 0);
+
+  area.innerHTML = `
+    <div class="food-card">
+      <div class="corner-tag">${currentIndex + 1} / ${shuffled.length}</div>
+      <div class="food-visual">
+        <div class="food-emoji-wrap">${food.emoji}</div>
+        <div class="food-name">${food.name}</div>
+      </div>
+      <div class="vote-sections">
+        <div class="vote-group">
+          <div class="vote-label">🌡 Temperature</div>
+          <button class="vote-btn" id="btn-hot"  onclick="pick('temp','hot')">🔥 Hot</button>
+          <button class="vote-btn" id="btn-cold" onclick="pick('temp','cold')">🧊 Cold</button>
+        </div>
+        <div class="vote-group">
+          <div class="vote-label">⚖️ Morality</div>
+          <button class="vote-btn" id="btn-good" onclick="pick('moral','good')">😇 Good</button>
+          <button class="vote-btn" id="btn-bad"  onclick="pick('moral','bad')">😈 Bad</button>
+        </div>
+      </div>
+      <div class="submit-row">
+        <button class="skip-btn" onclick="skip()">Skip</button>
+        <button class="submit-btn" id="submit-btn" onclick="castVote()">Cast Verdict →</button>
+      </div>
+    </div>`;
+
+  document.getElementById('vote-counter').innerHTML =
+    `<b>${total}</b> total verdict${total !== 1 ? 's' : ''} cast`;
+}
+
+function pick(dim, val) {
+  if (dim === 'temp') {
+    tempChoice = val;
+    document.getElementById('btn-hot').className  = 'vote-btn' + (val === 'hot'  ? ' sel-hot'  : '');
+    document.getElementById('btn-cold').className = 'vote-btn' + (val === 'cold' ? ' sel-cold' : '');
+  } else {
+    moralChoice = val;
+    document.getElementById('btn-good').className = 'vote-btn' + (val === 'good' ? ' sel-good' : '');
+    document.getElementById('btn-bad').className  = 'vote-btn' + (val === 'bad'  ? ' sel-bad'  : '');
+  }
+  document.getElementById('submit-btn').className =
+    'submit-btn' + (tempChoice && moralChoice ? ' ready' : '');
+}
+
+function castVote() {
+  if (!tempChoice || !moralChoice) return;
+
+  const food  = shuffled[currentIndex];
+  const votes = loadVotes();
+
+  if (!votes[food.id]) {
+    votes[food.id] = { name: food.name, emoji: food.emoji, hot:0, cold:0, good:0, bad:0 };
+  }
+  votes[food.id][tempChoice]++;
+  votes[food.id][moralChoice]++;
+  saveVotes(votes);
+
+  currentIndex++;
+  showToast('Verdict recorded ✓');
+  renderVote();
+}
+
+function skip() {
+  currentIndex++;
+  renderVote();
+}
+
+function restart() {
+  shuffled.sort(() => Math.random() - 0.5);
+  currentIndex = 0;
+  renderVote();
+}
+
+// ── Results Page ──────────────────────────────────────────────────────────────
+function setSort(mode, btn) {
+  sortMode = mode;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderResults();
+}
+
+function badge(a, b, classA, classB, iconA, iconB) {
+  if (a === 0 && b === 0) return `<span class="verdict tie">— no votes</span>`;
+  if (a === b) return `<span class="verdict tie">⚖️ Tied</span>`;
+  return a > b
+    ? `<span class="verdict ${classA}">${iconA} ${classA}</span>`
+    : `<span class="verdict ${classB}">${iconB} ${classB}</span>`;
+}
+
+function renderResults() {
+  const votes = loadVotes();
+
+  const rows = FOODS.map(f => {
+    const v = votes[f.id] || {};
+    return { ...f, hot: v.hot||0, cold: v.cold||0, good: v.good||0, bad: v.bad||0 };
+  });
+
+  rows.sort((a, b) => {
+    if (sortMode === 'name')  return a.name.localeCompare(b.name);
+    if (sortMode === 'votes') return (b.hot + b.cold) - (a.hot + a.cold);
+    if (sortMode === 'hot')   return b.hot  - a.hot;
+    if (sortMode === 'good')  return b.good - a.good;
+    return 0;
+  });
+
+  const totalVotes = rows.reduce((s, r) => s + r.hot + r.cold, 0);
+  document.getElementById('total-badge').innerHTML =
+    `<b>${totalVotes}</b> total verdict${totalVotes !== 1 ? 's' : ''}`;
+
+  if (totalVotes === 0) {
+    document.getElementById('results-table').innerHTML = `
+      <table><tbody><tr class="no-data-row">
+        <td colspan="5">No verdicts yet — go cast some votes!</td>
+      </tr></tbody></table>`;
+    return;
+  }
+
+  const rowsHtml = rows.map(r => {
+    const tTotal = r.hot  + r.cold;
+    const mTotal = r.good + r.bad;
+    const hotPct  = tTotal ? Math.round(r.hot  / tTotal * 100) : 0;
+    const coldPct = tTotal ? Math.round(r.cold / tTotal * 100) : 0;
+    const goodPct = mTotal ? Math.round(r.good / mTotal * 100) : 0;
+    const badPct  = mTotal ? Math.round(r.bad  / mTotal * 100) : 0;
+
+    return `<tr>
+      <td><div class="food-cell">
+        <span class="food-cell-emoji">${r.emoji}</span>
+        <span class="food-cell-name">${r.name}</span>
+      </div></td>
+      <td class="bar-cell"><div class="bar-pair">
+        <div class="bar-row">
+          <span class="bar-lbl">🔥 Hot</span>
+          <div class="bar-track"><div class="bar-fill hot" style="width:${hotPct}%"></div></div>
+          <span class="bar-count">${r.hot}</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-lbl">🧊 Cold</span>
+          <div class="bar-track"><div class="bar-fill cold" style="width:${coldPct}%"></div></div>
+          <span class="bar-count">${r.cold}</span>
+        </div>
+      </div></td>
+      <td>${badge(r.hot, r.cold, 'hot','cold','🔥','🧊')}</td>
+      <td class="bar-cell"><div class="bar-pair">
+        <div class="bar-row">
+          <span class="bar-lbl">😇 Good</span>
+          <div class="bar-track"><div class="bar-fill good" style="width:${goodPct}%"></div></div>
+          <span class="bar-count">${r.good}</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-lbl">😈 Bad</span>
+          <div class="bar-track"><div class="bar-fill bad" style="width:${badPct}%"></div></div>
+          <span class="bar-count">${r.bad}</span>
+        </div>
+      </div></td>
+      <td>${badge(r.good, r.bad, 'good','bad','😇','😈')}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('results-table').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Food</th>
+        <th colspan="2">🌡 Temperature</th>
+        <th colspan="2">⚖️ Morality</th>
+      </tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>`;
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+renderVote();
+</script>
+</body>
+</html>
