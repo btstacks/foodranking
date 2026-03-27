@@ -13,8 +13,8 @@
       --border: #2e2924;
       --accent-hot: #e8552a;
       --accent-cold: #3a8fd4;
-      --accent-good: #5ab552;
-      --accent-bad: #c4395e;
+      --accent-sexy: #c84ab5;
+      --accent-unsexy: #7a7067;
       --text: #f0ebe4;
       --text-muted: #7a7067;
       --stamp: #e8c84a;
@@ -193,8 +193,8 @@
     .vote-btn:hover { background: #272320; }
     .vote-btn.sel-hot  { border-color: var(--accent-hot);  color: var(--accent-hot);  background: #2a1612; }
     .vote-btn.sel-cold { border-color: var(--accent-cold); color: var(--accent-cold); background: #0e1e2e; }
-    .vote-btn.sel-good { border-color: var(--accent-good); color: var(--accent-good); background: #0e2011; }
-    .vote-btn.sel-bad  { border-color: var(--accent-bad);  color: var(--accent-bad);  background: #2a0e18; }
+    .vote-btn.sel-sexy   { border-color: var(--accent-sexy);   color: var(--accent-sexy);   background: #2a0e26; }
+    .vote-btn.sel-unsexy { border-color: var(--accent-unsexy); color: var(--accent-unsexy); background: #1a1714; }
 
     .submit-row {
       display: flex;
@@ -434,8 +434,8 @@
     .bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s cubic-bezier(0.16,1,0.3,1); }
     .bar-fill.hot  { background: var(--accent-hot); }
     .bar-fill.cold { background: var(--accent-cold); }
-    .bar-fill.good { background: var(--accent-good); }
-    .bar-fill.bad  { background: var(--accent-bad); }
+    .bar-fill.sexy   { background: var(--accent-sexy); }
+    .bar-fill.unsexy { background: var(--accent-unsexy); }
     .bar-count {
       font-family: 'DM Mono', monospace;
       font-size: 0.62rem;
@@ -458,8 +458,8 @@
     }
     .verdict.hot  { color: var(--accent-hot);  border-color: var(--accent-hot);  background: #2a1612; }
     .verdict.cold { color: var(--accent-cold); border-color: var(--accent-cold); background: #0e1e2e; }
-    .verdict.good { color: var(--accent-good); border-color: var(--accent-good); background: #0e2011; }
-    .verdict.bad  { color: var(--accent-bad);  border-color: var(--accent-bad);  background: #2a0e18; }
+    .verdict.sexy   { color: var(--accent-sexy);   border-color: var(--accent-sexy);   background: #2a0e26; }
+    .verdict.unsexy { color: var(--accent-unsexy); border-color: var(--accent-unsexy); background: #1a1714; }
     .verdict.tie  { color: var(--text-muted); border-color: var(--border); }
 
     .no-data-row td {
@@ -505,7 +505,7 @@
     <button class="sort-btn active" onclick="setSort('name', this)">Name</button>
     <button class="sort-btn" onclick="setSort('votes', this)">Most Voted</button>
     <button class="sort-btn" onclick="setSort('hot', this)">Hottest</button>
-    <button class="sort-btn" onclick="setSort('good', this)">Goodest</button>
+    <button class="sort-btn" onclick="setSort('good', this)">Sexiest</button>
     <div class="spacer"></div>
     <span class="total-badge" id="total-badge"></span>
     <button class="refresh-btn" onclick="renderResults()">↻ Refresh</button>
@@ -518,35 +518,110 @@
 <script>
 // ── Food list ─────────────────────────────────────────────────────────────────
 const FOODS = [
-  { id:'pizza',         name:'Pizza',          emoji:'🍕' },
-  { id:'ice_cream',     name:'Ice Cream',      emoji:'🍦' },
-  { id:'sushi',         name:'Sushi',          emoji:'🍣' },
-  { id:'hot_dog',       name:'Hot Dog',        emoji:'🌭' },
-  { id:'salad',         name:'Salad',          emoji:'🥗' },
-  { id:'burger',        name:'Burger',         emoji:'🍔' },
-  { id:'broccoli',      name:'Broccoli',       emoji:'🥦' },
-  { id:'donut',         name:'Donut',          emoji:'🍩' },
-  { id:'soup',          name:'Soup',           emoji:'🍲' },
-  { id:'apple',         name:'Apple',          emoji:'🍎' },
-  { id:'fries',         name:'Fries',          emoji:'🍟' },
-  { id:'taco',          name:'Taco',           emoji:'🌮' },
-  { id:'soda',          name:'Soda',           emoji:'🥤' },
-  { id:'avocado',       name:'Avocado',        emoji:'🥑' },
-  { id:'fried_chicken', name:'Fried Chicken',  emoji:'🍗' },
-  { id:'carrot',        name:'Carrot',         emoji:'🥕' },
-  { id:'chocolate',     name:'Chocolate',      emoji:'🍫' },
-  { id:'steak',         name:'Steak',          emoji:'🥩' },
-  { id:'smoothie',      name:'Smoothie',       emoji:'🥤' },
-  { id:'cake',          name:'Cake',           emoji:'🎂' },
-  { id:'ramen',         name:'Ramen',          emoji:'🍜' },
-  { id:'watermelon',    name:'Watermelon',     emoji:'🍉' },
-  { id:'nachos',        name:'Nachos',         emoji:'🧀' },
-  { id:'kale',          name:'Kale',           emoji:'🥬' },
-  { id:'lobster',       name:'Lobster',        emoji:'🦞' },
+  { id:'pizza',         name:'Pizza',             emoji:'🍕' },
+  { id:'ice_cream',     name:'Ice Cream',          emoji:'🍦' },
+  { id:'sushi',         name:'Sushi',              emoji:'🍣' },
+  { id:'hot_dog',       name:'Hot Dog',            emoji:'🌭' },
+  { id:'salad',         name:'Salad',              emoji:'🥗' },
+  { id:'burger',        name:'Burger',             emoji:'🍔' },
+  { id:'broccoli',      name:'Broccoli',           emoji:'🥦' },
+  { id:'donut',         name:'Donut',              emoji:'🍩' },
+  { id:'soup',          name:'Soup',               emoji:'🍲' },
+  { id:'apple',         name:'Apple',              emoji:'🍎' },
+  { id:'fries',         name:'Fries',              emoji:'🍟' },
+  { id:'taco',          name:'Taco',               emoji:'🌮' },
+  { id:'soda',          name:'Soda',               emoji:'🥤' },
+  { id:'avocado',       name:'Avocado',            emoji:'🥑' },
+  { id:'fried_chicken', name:'Fried Chicken',      emoji:'🍗' },
+  { id:'carrot',        name:'Carrot',             emoji:'🥕' },
+  { id:'chocolate',     name:'Chocolate',          emoji:'🍫' },
+  { id:'steak',         name:'Steak',              emoji:'🥩' },
+  { id:'smoothie',      name:'Smoothie',           emoji:'🥤' },
+  { id:'cake',          name:'Cake',               emoji:'🎂' },
+  { id:'ramen',         name:'Ramen',              emoji:'🍜' },
+  { id:'watermelon',    name:'Watermelon',         emoji:'🍉' },
+  { id:'nachos',        name:'Nachos',             emoji:'🧀' },
+  { id:'kale',          name:'Kale',               emoji:'🥬' },
+  { id:'lobster',       name:'Lobster',            emoji:'🦞' },
+  { id:'pasta',         name:'Pasta',              emoji:'🍝' },
+  { id:'pancakes',      name:'Pancakes',           emoji:'🥞' },
+  { id:'waffles',       name:'Waffles',            emoji:'🧇' },
+  { id:'croissant',     name:'Croissant',          emoji:'🥐' },
+  { id:'bagel',         name:'Bagel',              emoji:'🥯' },
+  { id:'pretzel',       name:'Pretzel',            emoji:'🥨' },
+  { id:'popcorn',       name:'Popcorn',            emoji:'🍿' },
+  { id:'cotton_candy',  name:'Cotton Candy',       emoji:'🍭' },
+  { id:'lollipop',      name:'Lollipop',           emoji:'🍭' },
+  { id:'cookie',        name:'Cookie',             emoji:'🍪' },
+  { id:'pie',           name:'Pie',                emoji:'🥧' },
+  { id:'cupcake',       name:'Cupcake',            emoji:'🧁' },
+  { id:'candy',         name:'Candy',              emoji:'🍬' },
+  { id:'honey',         name:'Honey',              emoji:'🍯' },
+  { id:'peanut_butter', name:'Peanut Butter',      emoji:'🥜' },
+  { id:'shrimp',        name:'Shrimp',             emoji:'🍤' },
+  { id:'crab',          name:'Crab',               emoji:'🦀' },
+  { id:'oyster',        name:'Oyster',             emoji:'🦪' },
+  { id:'fish',          name:'Fish',               emoji:'🐟' },
+  { id:'salmon',        name:'Salmon',             emoji:'🍣' },
+  { id:'bacon',         name:'Bacon',              emoji:'🥓' },
+  { id:'egg',           name:'Egg',                emoji:'🍳' },
+  { id:'cheese',        name:'Cheese',             emoji:'🧀' },
+  { id:'butter',        name:'Butter',             emoji:'🧈' },
+  { id:'milk',          name:'Milk',               emoji:'🥛' },
+  { id:'yogurt',        name:'Yogurt',             emoji:'🫙' },
+  { id:'tofu',          name:'Tofu',               emoji:'🟨' },
+  { id:'mushroom',      name:'Mushroom',           emoji:'🍄' },
+  { id:'corn',          name:'Corn',               emoji:'🌽' },
+  { id:'potato',        name:'Potato',             emoji:'🥔' },
+  { id:'tomato',        name:'Tomato',             emoji:'🍅' },
+  { id:'onion',         name:'Onion',              emoji:'🧅' },
+  { id:'garlic',        name:'Garlic',             emoji:'🧄' },
+  { id:'pepper',        name:'Bell Pepper',        emoji:'🫑' },
+  { id:'cucumber',      name:'Cucumber',           emoji:'🥒' },
+  { id:'eggplant',      name:'Eggplant',           emoji:'🍆' },
+  { id:'pumpkin',       name:'Pumpkin',            emoji:'🎃' },
+  { id:'strawberry',    name:'Strawberry',         emoji:'🍓' },
+  { id:'blueberry',     name:'Blueberry',          emoji:'🫐' },
+  { id:'mango',         name:'Mango',              emoji:'🥭' },
+  { id:'pineapple',     name:'Pineapple',          emoji:'🍍' },
+  { id:'banana',        name:'Banana',             emoji:'🍌' },
+  { id:'grapes',        name:'Grapes',             emoji:'🍇' },
+  { id:'peach',         name:'Peach',              emoji:'🍑' },
+  { id:'lemon',         name:'Lemon',              emoji:'🍋' },
+  { id:'orange',        name:'Orange',             emoji:'🍊' },
+  { id:'cherry',        name:'Cherry',             emoji:'🍒' },
+  { id:'pear',          name:'Pear',               emoji:'🍐' },
+  { id:'coconut',       name:'Coconut',            emoji:'🥥' },
+  { id:'kiwi',          name:'Kiwi',               emoji:'🥝' },
+  { id:'melon',         name:'Melon',              emoji:'🍈' },
+  { id:'fig',           name:'Fig',                emoji:'🫐' },
+  { id:'burrito',       name:'Burrito',            emoji:'🌯' },
+  { id:'sandwich',      name:'Sandwich',           emoji:'🥪' },
+  { id:'wrap',          name:'Wrap',               emoji:'🫔' },
+  { id:'spring_roll',   name:'Spring Roll',        emoji:'🥢' },
+  { id:'dumpling',      name:'Dumpling',           emoji:'🥟' },
+  { id:'falafel',       name:'Falafel',            emoji:'🧆' },
+  { id:'hummus',        name:'Hummus',             emoji:'🫙' },
+  { id:'curry',         name:'Curry',              emoji:'🍛' },
+  { id:'fried_rice',    name:'Fried Rice',         emoji:'🍚' },
+  { id:'bibimbap',      name:'Bibimbap',           emoji:'🍱' },
+  { id:'pho',           name:'Pho',                emoji:'🍜' },
+  { id:'paella',        name:'Paella',             emoji:'🥘' },
+  { id:'fondue',        name:'Fondue',             emoji:'🫕' },
+  { id:'chili',         name:'Chili',              emoji:'🌶️' },
+  { id:'mac_cheese',    name:'Mac & Cheese',       emoji:'🧀' },
+  { id:'granola',       name:'Granola',            emoji:'🥣' },
+  { id:'oatmeal',       name:'Oatmeal',            emoji:'🥣' },
+  { id:'cereal',        name:'Cereal',             emoji:'🥣' },
+  { id:'coffee',        name:'Coffee',             emoji:'☕' },
+  { id:'tea',           name:'Tea',                emoji:'🍵' },
+  { id:'beer',          name:'Beer',               emoji:'🍺' },
+  { id:'wine',          name:'Wine',               emoji:'🍷' },
+  { id:'champagne',     name:'Champagne',          emoji:'🍾' },
 ];
 
 // ── Storage ───────────────────────────────────────────────────────────────────
-const STORAGE_KEY = 'food_tribunal_votes_v2';
+const STORAGE_KEY = 'food_tribunal_votes_v3';
 
 function loadVotes() {
   try {
@@ -564,7 +639,7 @@ function saveVotes(votes) {
 const shuffled = [...FOODS].sort(() => Math.random() - 0.5);
 let currentIndex = 0;
 let tempChoice   = null;
-let moralChoice  = null;
+let sexyChoice   = null;
 let sortMode     = 'name';
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -596,7 +671,7 @@ function renderVote() {
   }
 
   tempChoice  = null;
-  moralChoice = null;
+  sexyChoice  = null;
   const food  = shuffled[currentIndex];
   const votes = loadVotes();
   const total = Object.values(votes).reduce((s, v) => s + (v.hot||0) + (v.cold||0), 0);
@@ -611,13 +686,13 @@ function renderVote() {
       <div class="vote-sections">
         <div class="vote-group">
           <div class="vote-label">🌡 Temperature</div>
-          <button class="vote-btn" id="btn-hot"  onclick="pick('temp','hot')">🔥 Hot</button>
-          <button class="vote-btn" id="btn-cold" onclick="pick('temp','cold')">🧊 Cold</button>
+          <button class="vote-btn" id="btn-hot"    onclick="pick('temp','hot')">🔥 Hot</button>
+          <button class="vote-btn" id="btn-cold"   onclick="pick('temp','cold')">🧊 Cold</button>
         </div>
         <div class="vote-group">
-          <div class="vote-label">⚖️ Morality</div>
-          <button class="vote-btn" id="btn-good" onclick="pick('moral','good')">😇 Good</button>
-          <button class="vote-btn" id="btn-bad"  onclick="pick('moral','bad')">😈 Bad</button>
+          <div class="vote-label">💋 Sexiness</div>
+          <button class="vote-btn" id="btn-sexy"   onclick="pick('sexy','sexy')">💋 Sexy</button>
+          <button class="vote-btn" id="btn-unsexy" onclick="pick('sexy','unsexy')">🙈 Unsexy</button>
         </div>
       </div>
       <div class="submit-row">
@@ -636,25 +711,25 @@ function pick(dim, val) {
     document.getElementById('btn-hot').className  = 'vote-btn' + (val === 'hot'  ? ' sel-hot'  : '');
     document.getElementById('btn-cold').className = 'vote-btn' + (val === 'cold' ? ' sel-cold' : '');
   } else {
-    moralChoice = val;
-    document.getElementById('btn-good').className = 'vote-btn' + (val === 'good' ? ' sel-good' : '');
-    document.getElementById('btn-bad').className  = 'vote-btn' + (val === 'bad'  ? ' sel-bad'  : '');
+    sexyChoice = val;
+    document.getElementById('btn-sexy').className   = 'vote-btn' + (val === 'sexy'   ? ' sel-sexy'   : '');
+    document.getElementById('btn-unsexy').className = 'vote-btn' + (val === 'unsexy' ? ' sel-unsexy' : '');
   }
   document.getElementById('submit-btn').className =
-    'submit-btn' + (tempChoice && moralChoice ? ' ready' : '');
+    'submit-btn' + (tempChoice && sexyChoice ? ' ready' : '');
 }
 
 function castVote() {
-  if (!tempChoice || !moralChoice) return;
+  if (!tempChoice || !sexyChoice) return;
 
   const food  = shuffled[currentIndex];
   const votes = loadVotes();
 
   if (!votes[food.id]) {
-    votes[food.id] = { name: food.name, emoji: food.emoji, hot:0, cold:0, good:0, bad:0 };
+    votes[food.id] = { name: food.name, emoji: food.emoji, hot:0, cold:0, sexy:0, unsexy:0 };
   }
   votes[food.id][tempChoice]++;
-  votes[food.id][moralChoice]++;
+  votes[food.id][sexyChoice]++;
   saveVotes(votes);
 
   currentIndex++;
@@ -694,14 +769,14 @@ function renderResults() {
 
   const rows = FOODS.map(f => {
     const v = votes[f.id] || {};
-    return { ...f, hot: v.hot||0, cold: v.cold||0, good: v.good||0, bad: v.bad||0 };
+    return { ...f, hot: v.hot||0, cold: v.cold||0, sexy: v.sexy||0, unsexy: v.unsexy||0 };
   });
 
   rows.sort((a, b) => {
     if (sortMode === 'name')  return a.name.localeCompare(b.name);
     if (sortMode === 'votes') return (b.hot + b.cold) - (a.hot + a.cold);
     if (sortMode === 'hot')   return b.hot  - a.hot;
-    if (sortMode === 'good')  return b.good - a.good;
+    if (sortMode === 'good')  return b.sexy - a.sexy;
     return 0;
   });
 
@@ -718,12 +793,12 @@ function renderResults() {
   }
 
   const rowsHtml = rows.map(r => {
-    const tTotal = r.hot  + r.cold;
-    const mTotal = r.good + r.bad;
-    const hotPct  = tTotal ? Math.round(r.hot  / tTotal * 100) : 0;
-    const coldPct = tTotal ? Math.round(r.cold / tTotal * 100) : 0;
-    const goodPct = mTotal ? Math.round(r.good / mTotal * 100) : 0;
-    const badPct  = mTotal ? Math.round(r.bad  / mTotal * 100) : 0;
+    const tTotal = r.hot   + r.cold;
+    const sTotal = r.sexy  + r.unsexy;
+    const hotPct    = tTotal ? Math.round(r.hot    / tTotal * 100) : 0;
+    const coldPct   = tTotal ? Math.round(r.cold   / tTotal * 100) : 0;
+    const sexyPct   = sTotal ? Math.round(r.sexy   / sTotal * 100) : 0;
+    const unsexyPct = sTotal ? Math.round(r.unsexy / sTotal * 100) : 0;
 
     return `<tr>
       <td><div class="food-cell">
@@ -745,17 +820,17 @@ function renderResults() {
       <td>${badge(r.hot, r.cold, 'hot','cold','🔥','🧊')}</td>
       <td class="bar-cell"><div class="bar-pair">
         <div class="bar-row">
-          <span class="bar-lbl">😇 Good</span>
-          <div class="bar-track"><div class="bar-fill good" style="width:${goodPct}%"></div></div>
-          <span class="bar-count">${r.good}</span>
+          <span class="bar-lbl">💋 Sexy</span>
+          <div class="bar-track"><div class="bar-fill sexy" style="width:${sexyPct}%"></div></div>
+          <span class="bar-count">${r.sexy}</span>
         </div>
         <div class="bar-row">
-          <span class="bar-lbl">😈 Bad</span>
-          <div class="bar-track"><div class="bar-fill bad" style="width:${badPct}%"></div></div>
-          <span class="bar-count">${r.bad}</span>
+          <span class="bar-lbl">🙈 Not</span>
+          <div class="bar-track"><div class="bar-fill unsexy" style="width:${unsexyPct}%"></div></div>
+          <span class="bar-count">${r.unsexy}</span>
         </div>
       </div></td>
-      <td>${badge(r.good, r.bad, 'good','bad','😇','😈')}</td>
+      <td>${badge(r.sexy, r.unsexy, 'sexy','unsexy','💋','🙈')}</td>
     </tr>`;
   }).join('');
 
@@ -764,7 +839,7 @@ function renderResults() {
       <thead><tr>
         <th>Food</th>
         <th colspan="2">🌡 Temperature</th>
-        <th colspan="2">⚖️ Morality</th>
+        <th colspan="2">💋 Sexiness</th>
       </tr></thead>
       <tbody>${rowsHtml}</tbody>
     </table>`;
